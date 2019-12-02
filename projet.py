@@ -18,17 +18,17 @@ nlp = spacy.load('en_core_web_md')
 
 print("Ouverture et lecture du contenu en mode read only...")
 
-cat = []
+cat = {}
 # Ouverture du fichier qui contient les catégories de relations possibles
 with open('relations_properties.txt', 'r') as content_file:
     for line in content_file:
         content = line.strip().split(':')
-        cat.append({content[0]: content[1].strip().split()})
+        cat[content[0]] = content[1].strip().split()
     
 
 
 print("Analyse du texte en cours...")    
-doc = nlp("Alice Lee is sister of Bob. Bob loves to train at gym.")
+doc = nlp("Alice Lee is sister of Bob. Bob loves to train at gym. Jean is friend with Alice.")
 print("Analyse terminée.")
 
 """
@@ -57,27 +57,41 @@ Exemple: Le token "Alice" correspond au personnage "Alice Lee".
 """
 def match_character(token, list_characters):
     for chara in list_characters:
-            
-        if re.match(token, "alice lee") is not None:
+
+        if token.pos_ != "PUNCT" and re.match(token.text.lower(), chara) is not None:
             return chara
         
     return None
 
+"""
+Vérifie si un token correspond à une catégorie. (fonctionnement basique)
+Exemple: Le token "sister" correspond à la catégorie "famille".
+"""
 def match_category(token, cat):
     for c in cat:
-        if token.lower() in cat:
-            return True
+        if token.lower() in cat[c]:
+            return c
         
-    return False
+    return None
 
-def extract_relation(relations, cat, doc, characters, start_token,\
-                     stop_iteration):
+"""
+Extrait les relations des personnages
+"""
+def extract_relation(relations, cat, doc, characters, match_charac,\
+                     start_token, stop_iteration):
     stop_iteration = stop_iteration if stop_iteration < len(doc) \
         else len(doc) - 1
-        
+    
     for index in range(start_token, stop_iteration + 1):
-        if (match_category(token, cat)):
-            pass
+        c = match_category(doc[index].text, cat)
+        if (c is not None):
+            for indexbis in range(index, len(doc) - 1):
+                
+                match_charac_2 = match_character(doc[indexbis], characters)
+                if match_charac_2 is not None:
+                    relations.append({match_charac: [c, match_charac_2]})
+                    break
+            break
         
 
 # Liste des personnages
@@ -85,7 +99,7 @@ characters = extract_characters(doc)
 
 # relations = ['Personnage1': {lien de la relation, Personnage2}]
 relations = []
-k = 5
+stop_iteration = 15
 start = 0
 for token in doc:
     start += 1
@@ -93,10 +107,12 @@ for token in doc:
     if match_charac is None:
         continue
     
-    extract_relation(relations, cat, doc, characters, start)
+#    print(match_charac)
+    extract_relation(relations, cat, doc, characters, match_charac, start, stop_iteration)
     
-    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
+print(relations)
+#    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
+#            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
 #print(doc._.coref_clusters)
     
 #print(doc._.has_coref)
