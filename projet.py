@@ -26,7 +26,7 @@ with open('relations_properties.txt', 'r') as content_file:
         cat[content[0]] = content[1].strip().split()
     
 # Ouverture du corpus
-with open('corpus/debug.txt', 'r') as content_file:
+with open('corpus/sherlock.txt', 'r') as content_file:
     corpus = content_file.read().strip()
 
 print("Analyse du texte en cours...")    
@@ -102,7 +102,7 @@ characters = extract_characters(doc)
 
 # relations = ['Personnage1': {lien de la relation, Personnage2}]
 relations = []
-stop_iteration = 5
+stop_iteration = 20
 start = 0
 for token in doc:
     start += 1

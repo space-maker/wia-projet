@@ -10,6 +10,7 @@ L'objectif du programme est de récolter des informations à partir d'un texte s
 Pour faire ce programme, on, utilise conda pour créer un environnement virtuel dédiée à la matière WIA. Puis, on installe ceci:
 spacy 2.1 (pip install spacy )
 neuralcoref (pip install neuralcoref)
+python -m spacy download en_core_web_sm (modèle utilisé)
 
 Une version plus récente de spacy existe mais à cause de difficultés de fonctionnement liés à neuralcoref, une version plus ancienne a été testé et fonctionne correctement.
 
