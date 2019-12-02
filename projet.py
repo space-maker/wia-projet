@@ -25,10 +25,12 @@ with open('relations_properties.txt', 'r') as content_file:
         content = line.strip().split(':')
         cat[content[0]] = content[1].strip().split()
     
-
+# Ouverture du corpus
+with open('corpus/debug.txt', 'r') as content_file:
+    corpus = content_file.read().strip()
 
 print("Analyse du texte en cours...")    
-doc = nlp("Alice Lee is sister of Bob. Bob loves to train at gym. Jean is friend with Alice.")
+doc = nlp(corpus)
 print("Analyse terminée.")
 
 """
@@ -79,11 +81,12 @@ Extrait les relations des personnages
 """
 def extract_relation(relations, cat, doc, characters, match_charac,\
                      start_token, stop_iteration):
-    stop_iteration = stop_iteration if stop_iteration < len(doc) \
-        else len(doc) - 1
+    stop_iteration = stop_iteration + start_token\
+    if (stop_iteration + start_token) < len(doc) else len(doc) - 1
     
-    for index in range(start_token, stop_iteration + 1):
+    for index in range(start_token, stop_iteration):
         c = match_category(doc[index].text, cat)
+       
         if (c is not None):
             for indexbis in range(index, len(doc) - 1):
                 
@@ -99,7 +102,7 @@ characters = extract_characters(doc)
 
 # relations = ['Personnage1': {lien de la relation, Personnage2}]
 relations = []
-stop_iteration = 15
+stop_iteration = 5
 start = 0
 for token in doc:
     start += 1
@@ -107,7 +110,6 @@ for token in doc:
     if match_charac is None:
         continue
     
-#    print(match_charac)
     extract_relation(relations, cat, doc, characters, match_charac, start, stop_iteration)
     
 print(relations)
