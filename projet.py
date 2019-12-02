@@ -27,7 +27,7 @@ with open('relations_properties.txt', 'r') as content_file:
     
 # Ouverture du corpus
 with open('corpus/sherlock.txt', 'r') as content_file:
-    corpus = content_file.read().strip()
+    corpus = content_file.read().strip().replace('\n', ' ')
 
 print("Analyse du texte en cours...")    
 doc = nlp(corpus)
@@ -77,6 +77,25 @@ def match_category(token, cat):
     return None
 
 """
+Fonction qui permet d'éviter les doublons dans la liste des relations entre
+personnages
+"""
+def exist_relation(relations, c1, c2, relation_type):
+    for r in relations:
+        for key in r:
+            rc1 = key
+            rc2 = r[key][1]
+            
+            r_type = r[key][0]
+            
+            if r_type == relation_type and ((rc1 == c1 and rc2 == c2)\
+                or (rc2 == c1 and rc1 == c2)):
+                    return True
+    
+    return False
+
+
+"""
 Extrait les relations des personnages
 """
 def extract_relation(relations, cat, doc, characters, match_charac,\
@@ -91,7 +110,10 @@ def extract_relation(relations, cat, doc, characters, match_charac,\
             for indexbis in range(index, len(doc) - 1):
                 
                 match_charac_2 = match_character(doc[indexbis], characters)
-                if match_charac_2 is not None:
+                if match_charac_2 is not None and \
+                    match_charac != match_charac_2 and \
+                    exist_relation(relations, match_charac, match_charac_2\
+                                   , c) == False:
                     relations.append({match_charac: [c, match_charac_2]})
                     break
             break
