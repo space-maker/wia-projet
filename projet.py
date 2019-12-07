@@ -12,8 +12,12 @@ import re
 print("Chargement du modèle...")
 nlp = spacy.load('en_core_web_md')
 
-#import neuralcoref
-#neuralcoref.add_to_pipe(nlp)
+# Activer ou non la coréférence
+neuralcoref_active = True
+
+if neuralcoref_active:
+    import neuralcoref
+    neuralcoref.add_to_pipe(nlp)
 
 
 print("Ouverture et lecture du contenu en mode read only...")
@@ -26,13 +30,13 @@ with open('relations_properties.txt', 'r') as content_file:
         cat[content[0]] = content[1].strip().split()
     
 # Ouverture du corpus
-with open('corpus/sherlock.txt', 'r') as content_file:
+with open('corpus/debug.txt', 'r') as content_file:
     corpus = content_file.read().strip().replace('\n', ' ')
 
-print("Analyse du texte en cours...")    
-doc = nlp(corpus)
-print("Analyse terminée.")
-
+# =============================================================================
+# Fonctions intermédiaires.
+# =============================================================================
+    
 """
 Extrait des personnages
 """
@@ -60,7 +64,8 @@ Exemple: Le token "Alice" correspond au personnage "Alice Lee".
 def match_character(token, list_characters):
     for chara in list_characters:
 
-        if token.pos_ != "PUNCT" and re.match(token.text.lower(), chara) is not None:
+        if token.pos_ != "PUNCT" and re.match(token.text.lower(), chara) \
+            is not None:
             return chara
         
     return None
@@ -118,13 +123,42 @@ def extract_relation(relations, cat, doc, characters, match_charac,\
                     break
             break
         
+# =============================================================================
+# Analyse d'un texte
+# =============================================================================
+
+# Coréférences
+print("Analyse du texte en cours...")    
+
+doc = nlp(corpus)
+a = doc._.coref_clusters
+
+if neuralcoref_active:
+    import numpy as np
+    corpus_neural = np.copy(doc)
+    
+    for x in a:
+        for y in x.mentions:
+            # Gestion des noms composés de type "Prenom Nom"
+            c = y._.coref_cluster.main.text.split()
+            if y ==  y._.coref_cluster.main:
+                continue
+            else:
+                corpus_neural[y.start] = y._.coref_cluster.main
+            corpus_neural[y.start] = y._.coref_cluster.main
+
+    doc = nlp(np.array2string(corpus_neural))
+
+print("Analyse terminée.")
+
+# Analyse effective du texte
 
 # Liste des personnages
 characters = extract_characters(doc)
 
 # relations = ['Personnage1': {lien de la relation, Personnage2}]
 relations = []
-stop_iteration = 20
+stop_iteration = 5
 start = 0
 for token in doc:
     start += 1
@@ -132,9 +166,15 @@ for token in doc:
     if match_charac is None:
         continue
     
-    extract_relation(relations, cat, doc, characters, match_charac, start, stop_iteration)
+    extract_relation(relations, cat, doc, characters, match_charac, start, \
+                     stop_iteration)
     
 print(relations)
+
+# =============================================================================
+# Évaluations du résultat
+# =============================================================================
+
 #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
 #            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
 #print(doc._.coref_clusters)

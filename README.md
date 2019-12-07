@@ -16,4 +16,5 @@ Une version plus récente de spacy existe mais à cause de difficultés de fonct
 
 # Contribution
 Auteur: BOAKNIN Jonathan
+
 Mail: jonathan.boaknin@ensiie.fr
