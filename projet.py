@@ -48,7 +48,7 @@ def extract_characters(doc):
             if entity.text.lower() in characters:
                 characters[entity.text.lower()].append({"pos_start": \
                           entity.start_char, "pos_end": entity.end_char})
-                #print(entity, entity.text, entity.label_, entity.start_char)  
+                # print(entity, entity.text, entity.label_, entity.start_char)  
             else:
                 characters[entity.text.lower()] = [\
                           {"pos_start": \
@@ -130,6 +130,7 @@ def extract_relation(relations, cat, doc, characters, match_charac,\
 # =============================================================================
 # Analyse d'un texte
 # =============================================================================
+import numpy as np
 
 # Coréférences
 print("Analyse du texte en cours...")    
@@ -178,7 +179,7 @@ def start_analyze_relationships(doc, characters, stop_iteration):
         relation potentielle avec un autre personnage parmi les 
         'stop_iteration' tokens suivants à partir du token actuel.
         """
-        extract_relation(relations, cat, doc, characters, match_charac, start, \
+        extract_relation(relations, cat, doc, characters, match_charac, start,\
                          stop_iteration)
 
     return relations
@@ -189,7 +190,6 @@ print(relations)
 # =============================================================================
 # Évaluations du résultat
 # =============================================================================
-import numpy as np
 import matplotlib.pyplot as plt
 
 # Ouverture du corpus annoté
@@ -198,11 +198,29 @@ relations_annoted = []
 with open('corpus/debug_annote.txt', 'r') as content_file:
     for line in content_file:
         corpus_annote = line.strip().split(',')
-        relations_annoted.append({corpus_annote[0]: [corpus_annote[1], corpus_annote[2]]})
+        relations_annoted.append({corpus_annote[0].lower(): \
+                                  [corpus_annote[1],\
+                                   corpus_annote[2].lower()]})
 
 # exist_relation(relations, match_charac, match_charac_2\
 #                                    , c)
         
+def match_between_relations(relations1, relations2):
+    c = 0
+    
+    for r in relations1:
+        for r_text in r:
+            c1 = r_text
+            c2 = r[r_text][1]
+
+            relation_type = r[r_text][0]
+                        
+            if exist_relation(relations2, c1, c2, relation_type):
+                c += 1
+                
+    return c
+            
+
 cardinal_relations_annoted = len(relations_annoted)
 
 start_k = 2
@@ -212,9 +230,26 @@ n = (stop_k - start_k) + 1
 recall = np.empty(n)
 accuracy = np.empty(n)
 
+start = 0
+
 for k in range(start_k, stop_k + 1):
     relations = start_analyze_relationships(doc, characters, k)
-    pass
+    
+    m = match_between_relations(relations, relations_annoted)
+    
+    recall[start] = (m / cardinal_relations_annoted)
+    accuracy[start] = (m / len(relations))
+    
+    start += 1
+    
+plt.clf()
+plt.grid()
+
+plt.xlabel("Précision")
+plt.ylabel("Rappel")
+
+plt.plot(recall, accuracy, "k-")
+plt.show()
 
 #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
 #            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
