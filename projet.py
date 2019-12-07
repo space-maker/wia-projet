@@ -115,6 +115,10 @@ def extract_relation(relations, cat, doc, characters, match_charac,\
             for indexbis in range(index, len(doc) - 1):
                 
                 match_charac_2 = match_character(doc[indexbis], characters)
+                """
+                On évite les relations de type "A est en relation avec A" et
+                les doublons comme "A [relation] B" == "B [relation] A"
+                """
                 if match_charac_2 is not None and \
                     match_charac != match_charac_2 and \
                     exist_relation(relations, match_charac, match_charac_2\
@@ -134,7 +138,6 @@ doc = nlp(corpus)
 a = doc._.coref_clusters
 
 if neuralcoref_active:
-    import numpy as np
     corpus_neural = np.copy(doc)
     
     for x in a:
@@ -165,23 +168,53 @@ def start_analyze_relationships(doc, characters, stop_iteration):
     start = 0
     for token in doc:
         start += 1
+        # Correspondance d'un personnages
         match_charac = match_character(token, characters)
         if match_charac is None:
             continue
         
+        """
+        Si on trouve une correspondance d'un personnage, on vérifie une 
+        relation potentielle avec un autre personnage parmi les 
+        'stop_iteration' tokens suivants à partir du token actuel.
+        """
         extract_relation(relations, cat, doc, characters, match_charac, start, \
                          stop_iteration)
 
     return relations
 
-relations = start_analyze_relationships(doc, characters, 2)
+relations = start_analyze_relationships(doc, characters, 5)
 print(relations)
 
 # =============================================================================
 # Évaluations du résultat
 # =============================================================================
+import numpy as np
+import matplotlib.pyplot as plt
 
+# Ouverture du corpus annoté
+relations_annoted = []
 
+with open('corpus/debug_annote.txt', 'r') as content_file:
+    for line in content_file:
+        corpus_annote = line.strip().split(',')
+        relations_annoted.append({corpus_annote[0]: [corpus_annote[1], corpus_annote[2]]})
+
+# exist_relation(relations, match_charac, match_charac_2\
+#                                    , c)
+        
+cardinal_relations_annoted = len(relations_annoted)
+
+start_k = 2
+stop_k = 10
+n = (stop_k - start_k) + 1
+
+recall = np.empty(n)
+accuracy = np.empty(n)
+
+for k in range(start_k, stop_k + 1):
+    relations = start_analyze_relationships(doc, characters, k)
+    pass
 
 #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
 #            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
