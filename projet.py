@@ -157,23 +157,31 @@ print("Analyse terminée.")
 characters = extract_characters(doc)
 
 # relations = ['Personnage1': {lien de la relation, Personnage2}]
-relations = []
-stop_iteration = 5
-start = 0
-for token in doc:
-    start += 1
-    match_charac = match_character(token, characters)
-    if match_charac is None:
-        continue
-    
-    extract_relation(relations, cat, doc, characters, match_charac, start, \
-                     stop_iteration)
-    
+"""
+Fonction d'analyse des relations
+"""
+def start_analyze_relationships(doc, characters, stop_iteration):
+    relations = []
+    start = 0
+    for token in doc:
+        start += 1
+        match_charac = match_character(token, characters)
+        if match_charac is None:
+            continue
+        
+        extract_relation(relations, cat, doc, characters, match_charac, start, \
+                         stop_iteration)
+
+    return relations
+
+relations = start_analyze_relationships(doc, characters, 2)
 print(relations)
 
 # =============================================================================
 # Évaluations du résultat
 # =============================================================================
+
+
 
 #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
 #            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
