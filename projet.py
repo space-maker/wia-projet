@@ -30,7 +30,7 @@ with open('relations_properties.txt', 'r') as content_file:
         cat[content[0]] = content[1].strip().split()
     
 # Ouverture du corpus
-with open('corpus/debug.txt', 'r') as content_file:
+with open('corpus/sherlock.txt', 'r') as content_file:
     corpus = content_file.read().strip().replace('\n', ' ')
 
 # =============================================================================
@@ -139,7 +139,7 @@ doc = nlp(corpus)
 a = doc._.coref_clusters
 
 if neuralcoref_active:
-    corpus_neural = np.copy(doc)
+    corpus_neural = np.array(doc, dtype = str)
     
     for x in a:
         for y in x.mentions:
@@ -148,10 +148,14 @@ if neuralcoref_active:
             if y ==  y._.coref_cluster.main:
                 continue
             else:
-                corpus_neural[y.start] = y._.coref_cluster.main
-            corpus_neural[y.start] = y._.coref_cluster.main
-
-    doc = nlp(np.array2string(corpus_neural))
+                corpus_neural[y.start] = y._.coref_cluster.main.text
+            # corpus_neural[y.start] = y._.coref_cluster.main
+    
+    corpus_new = ""
+    for s in np.array(corpus_neural, dtype=str):
+        corpus_new += " " + s
+        
+    doc = nlp(corpus_new)
 
 print("Analyse terminée.")
 
