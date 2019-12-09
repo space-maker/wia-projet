@@ -1,0 +1,5 @@
+Helen Stoner,Family,grimesby roylott
+Sherlock Holmes,Social,Watson
+irene adler,Social,Sherlock Holmes
+Godfrey Norton,Couple,irene adler
+

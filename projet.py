@@ -10,9 +10,9 @@ import re
 
 
 print("Chargement du modèle...")
-nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('en_core_web_md')
 
-# Activer ou non la coréférence
+# Activer ou non la coréférence. Peut prendre un certain temps d'exécution.
 neuralcoref_active = False
 
 if neuralcoref_active:
@@ -43,8 +43,10 @@ Attention: ne marche pas tout le temps car "Mme Lee" peut désigner un autre
 personnage.
 """
 def clean_characters(characters):
-    # On supprimer les "Monsieur", "Madame" des noms des personnages
-    c = list(map(lambda s: re.sub("mrs |mme |'s|mr ", "", s),\
+    # On supprimer les "Monsieur", "Madame" des noms des personnages.
+    # Le strip supprime les espaces sur le côté droit et gauche du nom.
+    c = list(map(lambda s: re.sub("mrs |mme |'s|mr |'|miss |mister "\
+                                  , "", s).strip(),\
                  list(characters)))
     c_clean = []
     
@@ -80,7 +82,7 @@ def extract_characters(doc):
                           {"pos_start": \
                           entity.start_char, "pos_end": entity.end_char}]
     
-    return characters
+    return clean_characters(characters)
 
     
 """
@@ -163,6 +165,10 @@ print("Analyse du texte en cours...")
 
 doc = nlp(corpus)
 
+"""
+Change les coréférences par leurs noms associés. Par exemple, si 'him' désinge
+'Harry', alors on remplace 'him' par 'Harry'.
+"""
 if neuralcoref_active:
     a = doc._.coref_clusters
     corpus_neural = np.array(doc, dtype = str)
@@ -180,7 +186,7 @@ if neuralcoref_active:
     corpus_new = ""
     for s in np.array(corpus_neural, dtype=str):
         corpus_new += " " + s
-        
+    
     doc = nlp(corpus_new)
 
 print("Analyse terminée.")
@@ -253,47 +259,31 @@ def match_between_relations(relations1, relations2):
 
 cardinal_relations_annoted = len(relations_annoted)
 
-
-start_k = 1
-stop_k = 15
-n = (stop_k - start_k) + 1
-
-recall = np.empty(n)
-accuracy = np.empty(n)
-
-start = 0
-
-for k in range(start_k, stop_k + 1):
-    relations = start_analyze_relationships(doc, characters, k)
+def eval_match(start_k, stop_k, doc, characters):
+    n = (stop_k - start_k) + 1
     
-    m = match_between_relations(relations, relations_annoted)
+    recall = np.empty(n)
+    accuracy = np.empty(n)
     
-    recall[start] = (m / cardinal_relations_annoted)
-    accuracy[start] = (m / len(relations))
+    start = 0
     
-    start += 1
+    for k in range(start_k, stop_k + 1):
+        relations = start_analyze_relationships(doc, characters, k)
+        
+        m = match_between_relations(relations, relations_annoted)
+        
+        recall[start] = (m / cardinal_relations_annoted)
+        accuracy[start] = (m / len(relations))
+        
+        start += 1
+        
+    plt.clf()
+    plt.grid()
     
-plt.clf()
-plt.grid()
-
-plt.xlabel("Précision")
-plt.ylabel("Rappel")
-
-plt.plot(recall, accuracy, "kx-")
-plt.show()
-
-#    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-#            token.shape_, token.is_alpha, token.is_stop, token.ent_type_)
-#print(doc._.coref_clusters)
+    plt.xlabel("Précision")
+    plt.ylabel("Rappel")
     
-#print(doc._.has_coref)
-#print(doc._.coref_clusters)
-#print(doc._.coref_resolved)
-#
-#print("Noun phrases:", [chunk.text for chunk in doc.noun_chunks])
-#print("Verbs:", [token.lemma_ for token in doc if token.pos_ == "PERSON"])
-#
-## Find named entities, phrases and concepts
-#for entity in doc.ents:
-#    if entity.label_ == "PERSON":
-#        print(entity.text, entity.label_, entity.start_char)
+    plt.plot(recall, accuracy, "kx-")
+    plt.show()
+    
+# eval_match(1, 15, doc, characters)
