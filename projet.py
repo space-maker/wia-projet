@@ -8,35 +8,6 @@ Created on Sun Nov 24 15:52:19 2019
 import spacy
 import re
 
-# Paramètres principales du programme
-name_corpus = "corpus/debug.txt"
-name_corpus_annote = "corpus/debug_annote.txt"
-k = 5
-
-print("Chargement du modèle...")
-nlp = spacy.load('en_core_web_md')
-
-# Activer ou non la coréférence. Peut prendre un certain temps d'exécution.
-neuralcoref_active = False
-
-if neuralcoref_active:
-    import neuralcoref
-    neuralcoref.add_to_pipe(nlp)
-
-
-print("Ouverture et lecture du contenu en mode read only...")
-
-cat = {}
-# Ouverture du fichier qui contient les catégories de relations possibles
-with open('relations_properties.txt', 'r') as content_file:
-    for line in content_file:
-        content = line.strip().split(':')
-        cat[content[0]] = content[1].strip().split()
-    
-# Ouverture du corpus
-with open(name_corpus, 'r') as content_file:
-    corpus = content_file.read().strip().replace('\n', ' ')
-
 # =============================================================================
 # Fonctions intermédiaires.
 # =============================================================================
@@ -60,7 +31,8 @@ def clean_characters(characters):
         
         c_tmp = c.copy()
         for k in range(1, len(c_tmp)):
-            s = c_tmp[k] + "$|^" + c_tmp[k] + "| " + c_tmp[k] + " " 
+            s = " " + c_tmp[k] + "$|^" + c_tmp[k] + " | " + c_tmp[k] + " |^"\
+                + c_tmp[k] + "$"
             if re.search(s, c_tmp[0]) is not None:
                 del c[k - count]
                 count += 1
@@ -95,8 +67,11 @@ Exemple: Le token "Alice" correspond au personnage "Alice Lee".
 """
 def match_character(token, list_characters):
     for chara in list_characters:
-
-        if token.pos_ != "PUNCT" and re.match(token.text.lower(), chara) \
+        token_text = token.text.lower()
+        s = " " + token_text + "$|^" + token_text + " | " + token_text + " |" \
+            + "^" + token_text + "$"
+        
+        if token.pos_ != "PUNCT" and re.match(s, chara) \
             is not None:
             return chara
         
@@ -164,48 +139,52 @@ def extract_relation(relations, cat, doc, characters, match_charac,\
 # =============================================================================
 import numpy as np
 
-# Coréférences
-print("Analyse du texte en cours...")    
 
-doc = nlp(corpus)
 
-"""
-Change les coréférences par leurs noms associés. Par exemple, si 'him' désinge
-'Harry', alors on remplace 'him' par 'Harry'.
-"""
-if neuralcoref_active:
-    pronouns = ["I", "you", "she", "he", "it", "we", "they", "me", "him"\
-                , "her", "my", "mine", "your", "yours", "his", "her"\
-                , "who", "whom", "whose", "that", "which", "another", "other"\
-                , "myself", "them", "their", "yourself", "themself"]
+def get_doc(corpus, neuralcoref_active):
+    doc = nlp(corpus)
     
-    a = doc._.coref_clusters
-    corpus_neural = np.array(doc, dtype = str)
+    """
+    Change les coréférences par leurs noms associés. Par exemple, si 'him' désinge
+    'Harry', alors on remplace 'him' par 'Harry'.
+    """
+    # Coréférences
+    print("Analyse du texte en cours...")    
+    if neuralcoref_active:
+        pronouns = ["I", "you", "she", "he", "it", "we", "they", "me", "him"\
+                    , "her", "my", "mine", "your", "yours", "his", "her"\
+                    , "who", "whom", "whose", "that", "which", "another", "other"\
+                    , "myself", "them", "their", "yourself", "themself"]
+        
+        a = doc._.coref_clusters
+        corpus_neural = np.array(doc, dtype = str)
+        
+        for x in a:
+            for y in x.mentions:
+                # Gestion des noms composés de type "Prenom Nom"
+                # c = y._.coref_cluster.main.text.split()
+                if y ==  y._.coref_cluster.main or y.text.lower() not in pronouns:
+                    continue
+                else:
+                    corpus_neural[y.start] = y._.coref_cluster.main.text
+                # corpus_neural[y.start] = y._.coref_cluster.main
+        
+        corpus_new = ""
+        for s in np.array(corpus_neural, dtype=str):
+            corpus_new += " " + s
+        
+        doc = nlp(corpus_new)
     
-    for x in a:
-        for y in x.mentions:
-            # Gestion des noms composés de type "Prenom Nom"
-            c = y._.coref_cluster.main.text.split()
-            if y ==  y._.coref_cluster.main or y.text.lower() not in pronouns:
-                continue
-            else:
-                corpus_neural[y.start] = y._.coref_cluster.main.text
-            # corpus_neural[y.start] = y._.coref_cluster.main
+    print("Analyse terminée.")
     
-    corpus_new = ""
-    for s in np.array(corpus_neural, dtype=str):
-        corpus_new += " " + s
+    # Analyse effective du texte
     
-    doc = nlp(corpus_new)
-
-print("Analyse terminée.")
-
-# Analyse effective du texte
-
-# Liste des personnages
-characters = extract_characters(doc)
-
-# relations = ['Personnage1': {lien de la relation, Personnage2}]
+    # Liste des personnages
+    characters = extract_characters(doc)
+    
+    return (doc, characters)
+    
+    # relations = ['Personnage1': {lien de la relation, Personnage2}]
 """
 Fonction d'analyse des relations
 """
@@ -229,26 +208,11 @@ def start_analyze_relationships(doc, characters, stop_iteration):
 
     return relations
 
-relations = start_analyze_relationships(doc, characters, k)
-print(relations)
 
 # =============================================================================
 # Évaluations du résultat
 # =============================================================================
 import matplotlib.pyplot as plt
-
-# Ouverture du corpus annoté
-relations_annoted = []
-
-with open(name_corpus_annote, 'r') as content_file:
-    for line in content_file:
-        corpus_annote = line.strip().split(',')
-        relations_annoted.append({corpus_annote[0].lower(): \
-                                  [corpus_annote[1],\
-                                   corpus_annote[2].lower()]})
-
-# exist_relation(relations, match_charac, match_charac_2\
-#                                    , c)
         
 def match_between_relations(relations1, relations2):
     c = 0
@@ -266,9 +230,8 @@ def match_between_relations(relations1, relations2):
     return c
             
 
-cardinal_relations_annoted = len(relations_annoted)
-
-def eval_match(start_k, stop_k, doc, characters):
+def eval_match(start_k, stop_k, doc, characters, relations_annoted):
+    cardinal_relations_annoted = len(relations_annoted)
     n = (stop_k - start_k) + 1
     
     recall = np.empty(n)
@@ -282,7 +245,7 @@ def eval_match(start_k, stop_k, doc, characters):
         m = match_between_relations(relations, relations_annoted)
         
         recall[start] = (m / cardinal_relations_annoted)
-        accuracy[start] = (m / len(relations))
+        accuracy[start] = (m / len(relations)) if len(relations) > 0 else 0
         
         start += 1
         
@@ -295,5 +258,62 @@ def eval_match(start_k, stop_k, doc, characters):
     plt.plot(recall, accuracy, "kx-")
     plt.show()
     
+# =============================================================================
+# Exécution des fonctions principales
+# =============================================================================
 
-eval_match(1, 20, doc, characters)
+# Paramètres principales du programme
+# name_corpus = "corpus/The_Mysterious_Affair_at_Styles.txt"
+# name_corpus_annote = "corpus/debug_annote.txt"
+
+name_corpus = "corpus/debug.txt"
+name_corpus_annote = "corpus/debug_annote.txt"
+
+k = 5
+
+# Analyse
+print("Chargement du modèle...")
+
+# Avec CUDA installé (version 9.2 utilisé ici)
+spacy.prefer_gpu()
+nlp = spacy.load('en_core_web_sm')
+
+# Activer ou non la coréférence. Peut prendre un certain temps d'exécution.
+neuralcoref_active = False
+
+if neuralcoref_active:
+    import neuralcoref
+    neuralcoref.add_to_pipe(nlp)
+
+
+print("Ouverture et lecture du contenu en mode read only...")
+
+cat = {}
+# Ouverture du fichier qui contient les catégories de relations possibles
+with open('relations_properties.txt', 'r') as content_file:
+    for line in content_file:
+        content = line.strip().split(':')
+        cat[content[0]] = content[1].strip().split()
+    
+# Ouverture du corpus
+with open(name_corpus, 'r') as content_file:
+    corpus = content_file.read().strip().replace('\n', ' ')
+    
+
+doc, characters = get_doc(corpus, neuralcoref_active)
+relations = start_analyze_relationships(doc, characters, k)
+print(relations)
+
+
+# Ouverture du corpus annoté
+relations_annoted = []
+
+with open(name_corpus_annote, 'r') as content_file:
+    for line in content_file:
+        corpus_annote = line.strip().split(',')
+        relations_annoted.append({corpus_annote[0].lower(): \
+                                  [corpus_annote[1],\
+                                    corpus_annote[2].lower()]})
+
+
+eval_match(1, 20, doc, characters, relations_annoted)
