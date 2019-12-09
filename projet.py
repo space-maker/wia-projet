@@ -8,6 +8,10 @@ Created on Sun Nov 24 15:52:19 2019
 import spacy
 import re
 
+# Paramètres principales du programme
+name_corpus = "corpus/debug.txt"
+name_corpus_annote = "corpus/debug_annote.txt"
+k = 5
 
 print("Chargement du modèle...")
 nlp = spacy.load('en_core_web_md')
@@ -30,7 +34,7 @@ with open('relations_properties.txt', 'r') as content_file:
         cat[content[0]] = content[1].strip().split()
     
 # Ouverture du corpus
-with open('corpus/sherlock.txt', 'r') as content_file:
+with open(name_corpus, 'r') as content_file:
     corpus = content_file.read().strip().replace('\n', ' ')
 
 # =============================================================================
@@ -170,6 +174,11 @@ Change les coréférences par leurs noms associés. Par exemple, si 'him' désin
 'Harry', alors on remplace 'him' par 'Harry'.
 """
 if neuralcoref_active:
+    pronouns = ["I", "you", "she", "he", "it", "we", "they", "me", "him"\
+                , "her", "my", "mine", "your", "yours", "his", "her"\
+                , "who", "whom", "whose", "that", "which", "another", "other"\
+                , "myself", "them", "their", "yourself", "themself"]
+    
     a = doc._.coref_clusters
     corpus_neural = np.array(doc, dtype = str)
     
@@ -177,7 +186,7 @@ if neuralcoref_active:
         for y in x.mentions:
             # Gestion des noms composés de type "Prenom Nom"
             c = y._.coref_cluster.main.text.split()
-            if y ==  y._.coref_cluster.main:
+            if y ==  y._.coref_cluster.main or y.text.lower() not in pronouns:
                 continue
             else:
                 corpus_neural[y.start] = y._.coref_cluster.main.text
@@ -220,7 +229,7 @@ def start_analyze_relationships(doc, characters, stop_iteration):
 
     return relations
 
-relations = start_analyze_relationships(doc, characters, 5)
+relations = start_analyze_relationships(doc, characters, k)
 print(relations)
 
 # =============================================================================
@@ -231,7 +240,7 @@ import matplotlib.pyplot as plt
 # Ouverture du corpus annoté
 relations_annoted = []
 
-with open('corpus/debug_annote.txt', 'r') as content_file:
+with open(name_corpus_annote, 'r') as content_file:
     for line in content_file:
         corpus_annote = line.strip().split(',')
         relations_annoted.append({corpus_annote[0].lower(): \
@@ -286,4 +295,5 @@ def eval_match(start_k, stop_k, doc, characters):
     plt.plot(recall, accuracy, "kx-")
     plt.show()
     
-# eval_match(1, 15, doc, characters)
+
+eval_match(1, 20, doc, characters)
