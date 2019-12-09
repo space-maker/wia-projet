@@ -10,10 +10,10 @@ import re
 
 
 print("Chargement du modèle...")
-nlp = spacy.load('en_core_web_md')
+nlp = spacy.load('en_core_web_sm')
 
 # Activer ou non la coréférence
-neuralcoref_active = True
+neuralcoref_active = False
 
 if neuralcoref_active:
     import neuralcoref
@@ -36,7 +36,33 @@ with open('corpus/sherlock.txt', 'r') as content_file:
 # =============================================================================
 # Fonctions intermédiaires.
 # =============================================================================
+"""
+Enlève les noms qui se ressemblent. Par exemple, "Alice Lee", "Alice" ou 
+"Mme Lee" sont en général les mêmes personnages.
+Attention: ne marche pas tout le temps car "Mme Lee" peut désigner un autre
+personnage.
+"""
+def clean_characters(characters):
+    # On supprimer les "Monsieur", "Madame" des noms des personnages
+    c = list(map(lambda s: re.sub("mrs |mme |'s|mr ", "", s),\
+                 list(characters)))
+    c_clean = []
     
+    while c != []:
+        count = 0
+        c_clean.append(c[0])
+        
+        c_tmp = c.copy()
+        for k in range(1, len(c_tmp)):
+            s = c_tmp[k] + "$|^" + c_tmp[k] + "| " + c_tmp[k] + " " 
+            if re.search(s, c_tmp[0]) is not None:
+                del c[k - count]
+                count += 1
+        del c[0]                    
+    
+    return c_clean
+
+
 """
 Extrait des personnages
 """
@@ -56,7 +82,7 @@ def extract_characters(doc):
     
     return characters
 
-
+    
 """
 Vérifie si un token correspond à un personnage. (fonctionnement basique)
 Exemple: Le token "Alice" correspond au personnage "Alice Lee".
@@ -91,9 +117,9 @@ def exist_relation(relations, c1, c2, relation_type):
             rc1 = key
             rc2 = r[key][1]
             
-            r_type = r[key][0]
-            
-            if r_type == relation_type and ((rc1 == c1 and rc2 == c2)\
+            # r_type = r[key][0]
+            # r_type == relation_type and 
+            if ((rc1 == c1 and rc2 == c2)\
                 or (rc2 == c1 and rc1 == c2)):
                     return True
     
@@ -126,7 +152,7 @@ def extract_relation(relations, cat, doc, characters, match_charac,\
                     relations.append({match_charac: [c, match_charac_2]})
                     break
             break
-        
+    
 # =============================================================================
 # Analyse d'un texte
 # =============================================================================
@@ -136,9 +162,9 @@ import numpy as np
 print("Analyse du texte en cours...")    
 
 doc = nlp(corpus)
-a = doc._.coref_clusters
 
 if neuralcoref_active:
+    a = doc._.coref_clusters
     corpus_neural = np.array(doc, dtype = str)
     
     for x in a:
@@ -227,8 +253,9 @@ def match_between_relations(relations1, relations2):
 
 cardinal_relations_annoted = len(relations_annoted)
 
-start_k = 2
-stop_k = 10
+
+start_k = 1
+stop_k = 15
 n = (stop_k - start_k) + 1
 
 recall = np.empty(n)
@@ -252,7 +279,7 @@ plt.grid()
 plt.xlabel("Précision")
 plt.ylabel("Rappel")
 
-plt.plot(recall, accuracy, "k-")
+plt.plot(recall, accuracy, "kx-")
 plt.show()
 
 #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,

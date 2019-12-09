@@ -1,4 +1,4 @@
-Family: brother sister mother cousin father uncle aunt grandfather grandmother
+Family: brother sister mother cousin father uncle aunt grandfather grandmother son daughter
 Social: friend enemy rivals
 Professional: employer employee colleague servant client boss
 Couple: husband wife wedding couple lover

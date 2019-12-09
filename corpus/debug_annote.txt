@@ -2,3 +2,5 @@ Alice Lee,Family,Bob
 Alice Lee,Social,Jean
 Kevin,Family,Alice Lee
 Alice Lee,Social,Jessy
+John Sheppard,Social,Alice
+Alice,Family,Ben
