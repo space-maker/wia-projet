@@ -258,12 +258,27 @@ def eval_match(start_k, stop_k, doc, characters, relations_annoted):
     plt.clf()
     plt.grid()
     
-    plt.xlabel("Rappel")
-    plt.ylabel("Précisions")
+    plt.xlabel("Décalage de k-occurences")
+    plt.ylabel("Rappel / Précisions")
     
-    plt.plot(recall, accuracy, "kx-")
+    t = np.arange(start_k, stop_k + 1)
+    plt.plot(t, recall, "kx-", label = "Rappel")
+    plt.plot(t, accuracy, "rx-", label = "Précision")
+    
+    plt.legend()
+    
+    
     plt.show()
     
+    plt.figure()
+    plt.grid()
+    
+    plt.xlabel("Rappel")
+    plt.ylabel("Précision")
+    
+    plt.plot(recall, accuracy, "kx-")
+    
+    plt.show()
 # =============================================================================
 # Exécution des fonctions principales
 # =============================================================================
