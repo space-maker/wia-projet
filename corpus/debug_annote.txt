@@ -4,3 +4,6 @@ Kevin,Family,Alice Lee
 Alice Lee,Social,Jessy
 John Sheppard,Social,Alice
 Alice,Family,Ben
+John Sheppard,Family,Johnny
+Rocinante,Social,John Sheppard
+Alan,Professional,John Sheppard

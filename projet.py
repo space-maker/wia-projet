@@ -280,7 +280,7 @@ print("Chargement du modèle...")
 nlp = spacy.load('en_core_web_sm')
 
 # Activer ou non la coréférence. Peut prendre un certain temps d'exécution.
-neuralcoref_active = True
+neuralcoref_active = False
 
 if neuralcoref_active:
     import neuralcoref
@@ -334,13 +334,14 @@ def run_extration(name_corpus, name_corpus_annote, k, graph = False,\
 # =============================================================================
 name_corpus = "corpus/debug.txt"
 name_corpus_annote = "corpus/debug_annote.txt"
-characters = run_extration(name_corpus, name_corpus_annote, 5, True, 1, 20)
+characters = run_extration(name_corpus, name_corpus_annote, 5, True, 2, 20)
     
 # =============================================================================
 # Little Women
 # =============================================================================
 # name_corpus = "corpus/little_womens.txt"
 # name_corpus_annote = "corpus/little_womens_annote.txt"
+# characters = run_extration(name_corpus, name_corpus_annote, 5, True, 2, 30)
 
 # =============================================================================
 # Sherlock Holmmes
@@ -348,7 +349,7 @@ characters = run_extration(name_corpus, name_corpus_annote, 5, True, 1, 20)
 # name_corpus = "corpus/sherlock.txt"
 # name_corpus_annote = "corpus/sherlock_annote.txt"
 
-# characters = run_extration(name_corpus, name_corpus_annote, 5, True, 1, 20)
+# characters = run_extration(name_corpus, name_corpus_annote, 5, True, 2, 20)
         
 
 

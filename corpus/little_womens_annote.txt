@@ -1,4 +1,11 @@
 Marmee,Family,March
 Josephine March,Social,Laurence
 Laurence,Social,Beth March
-Meg March,Social,Sallie Gardine
+Meg March,Social,Sallie Gardiner
+Josephine March,Family,Meg March
+Meg March,Social,Brooke
+Carrol,Family,Amy March
+Marmee,Family,Josephine March
+Marmee,Professional,Hannah
+Carrol,Family,Florence
+Brook,Professional,Laurence
