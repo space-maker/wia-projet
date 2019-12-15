@@ -1,0 +1,20 @@
+Carol,Family,Kennicott
+Carol,Social,Erik Valborg
+Kennicott,Social,Maud Dyer
+Carol,Social,Vida Sherwin
+Vida Sherwin,Social,Kennicott	
+Vida Sherwin,Family,Raymond Wutherspoon
+Carol,Social,Guy Pollock
+Carol,Professional,Bea Sorenson
+Bea Sorenson,Family,Miles Bjornstam
+Carol,Social,Miles Bjornstam
+Carol,Family,Kennicott
+Carol,Social,Vida Sherwin
+Carol,Social,Guy Pollock
+Bea Sorenson,Professional,Carol
+Bea Sorenson,Family,Miles Bjornstam
+Carol,Social,Fern Mullins
+Raymond Wutherspoon,Family,Vida Sherwin
+Bogart,Social,Carol
+Bessie,Family,Whittier Smail
+Erik Valborg,Social,Carol

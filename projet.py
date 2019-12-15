@@ -20,7 +20,7 @@ personnage.
 def clean_characters(characters):
     # On supprimer les "Monsieur", "Madame" des noms des personnages.
     # Le strip supprime les espaces sur le côté droit et gauche du nom.
-    c = list(map(lambda s: re.sub("mrs |mme |'s|mr |'|miss |mister "\
+    c = list(map(lambda s: re.sub("mrs |mme |'s|mr |'|miss |mister |the "\
                                   , "", s).strip(),\
                  list(characters)))
     c_clean = []
@@ -106,7 +106,8 @@ def exist_relation(relations, c1, c2, relation_type):
             
             r_type = r[key][0]
 
-            if (relation_type is None or r_type == relation_type) and ((rc1 == c1 and rc2 == c2)\
+            if (relation_type is None or r_type == relation_type) and \
+                ((rc1 == c1 and rc2 == c2)\
                 or (rc2 == c1 and rc1 == c2)):
                     return True
     
@@ -151,15 +152,15 @@ def get_doc(nlp, corpus, neuralcoref_active):
     doc = nlp(corpus)
     
     """
-    Change les coréférences par leurs noms associés. Par exemple, si 'him' désinge
-    'Harry', alors on remplace 'him' par 'Harry'.
+    Change les coréférences par leurs noms associés. Par exemple, 
+    si 'him' désinge 'Harry', alors on remplace 'him' par 'Harry'.
     """
     # Coréférences
     print("Analyse du texte en cours...")    
     if neuralcoref_active:
         pronouns = ["I", "you", "she", "he", "it", "we", "they", "me", "him"\
                     , "her", "my", "mine", "your", "yours", "his", "her"\
-                    , "who", "whom", "whose", "that", "which", "another", "other"\
+                 , "who", "whom", "whose", "that", "which", "another", "other"\
                     , "myself", "them", "their", "yourself", "themself"]
         
         a = doc._.coref_clusters
@@ -169,7 +170,8 @@ def get_doc(nlp, corpus, neuralcoref_active):
             for y in x.mentions:
                 # Gestion des noms composés de type "Prenom Nom"
                 # c = y._.coref_cluster.main.text.split()
-                if y ==  y._.coref_cluster.main or y.text.lower() not in pronouns:
+                if y ==  y._.coref_cluster.main or \
+                    y.text.lower() not in pronouns:
                     continue
                 else:
                     corpus_neural[y.start] = y._.coref_cluster.main.text
@@ -279,6 +281,8 @@ def eval_match(start_k, stop_k, doc, characters, relations_annoted):
     plt.plot(recall, accuracy, "kx-")
     
     plt.show()
+    
+    return (recall, accuracy)
 # =============================================================================
 # Exécution des fonctions principales
 # =============================================================================
@@ -295,7 +299,7 @@ print("Chargement du modèle...")
 nlp = spacy.load('en_core_web_sm')
 
 # Activer ou non la coréférence. Peut prendre un certain temps d'exécution.
-neuralcoref_active = False
+neuralcoref_active = True
 
 if neuralcoref_active:
     import neuralcoref
@@ -313,15 +317,23 @@ with open('relations_properties.txt', 'r') as content_file:
 
 """
 Programme principale
+name_corpus: nom du corpus
+name_corpus_annote: nom du corpus annoté
+characters: permet d'ajouter les personnages manuellement au lieu d'utiliser
+l'extracteur automatique du programme (mettre [] pour extraire auto)
+graph: mode d'évaluation rappel / précision
 """
-def run_extration(name_corpus, name_corpus_annote, k, graph = False,\
-                  start_k = 1, stop_k = 20):
+def run_extration(name_corpus, name_corpus_annote, characters_input, k, \
+                  graph = False, start_k = 1, stop_k = 20):
     # Ouverture du corpus
     with open(name_corpus, 'r') as content_file:
         corpus = content_file.read().strip().replace('\n', ' ')
         
-    
     doc, characters = get_doc(nlp, corpus, neuralcoref_active)
+    
+    if characters_input != []:
+        print("Extraction of characters not auto")
+        characters = characters_input
     
     relations = start_analyze_relationships(doc, characters, k)
     print(relations)
@@ -336,36 +348,157 @@ def run_extration(name_corpus, name_corpus_annote, k, graph = False,\
             relations_annoted.append({corpus_annote[0].lower(): \
                                       [corpus_annote[1],\
                                         corpus_annote[2].lower()]})
-    
+    recall, accuracy = [], []
     if graph:
-        eval_match(1, 20, doc, characters, relations_annoted)
+        recall, accuracy = eval_match(start_k, stop_k, doc, characters, \
+                                      relations_annoted)
         
-    return characters
+    return (characters, recall, accuracy)
 
 # Paramètres principales du programme
 
 # =============================================================================
 # Debug
 # =============================================================================
-name_corpus = "corpus/debug.txt"
-name_corpus_annote = "corpus/debug_annote.txt"
-characters = run_extration(name_corpus, name_corpus_annote, 5, True, 2, 20)
-    
+# name_corpus = "corpus/debug.txt"
+# name_corpus_annote = "corpus/debug_annote.txt"
+# characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
+
+# =============================================================================
+# Sherlock Holmmes
+# =============================================================================
+name_corpus = "corpus/sherlock.txt"
+name_corpus_annote = "corpus/sherlock_annote.txt"
+characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
+   
 # =============================================================================
 # Little Women
 # =============================================================================
 # name_corpus = "corpus/little_womens.txt"
 # name_corpus_annote = "corpus/little_womens_annote.txt"
-# characters = run_extration(name_corpus, name_corpus_annote, 5, True, 2, 30)
+# characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
 
 # =============================================================================
-# Sherlock Holmmes
+# Main Street (personnages ajoutés manuellement)
 # =============================================================================
-# name_corpus = "corpus/sherlock.txt"
-# name_corpus_annote = "corpus/sherlock_annote.txt"
+# name_corpus = "corpus/main_street.txt"
+# name_corpus_annote = "corpus/main_street_annote.txt"
+# characters = [
+#     "carol",
+#     "kennicott",
+#     "raymond wutherspoon",
+#     "guy pollock",
+#     "vida sherwin",
+#     "miles bjornstam",
+#     "bea sorenson",
+#     "erik valborg",
+#     "maud dyer",
+#     "whittier smail"
+#     ]
+# characters = run_extration(name_corpus, name_corpus_annote, characters, \
+#                            5, True)
 
-# characters = run_extration(name_corpus, name_corpus_annote, 5, True, 2, 20)
+# =============================================================================
+# Middlermarch (assez long à exécuter)
+# =============================================================================
+# characters = [
+#     "dorothea brooke",
+#     "edward casaubon",
+#     "will ladislaw",
+#     "harriet bulstrode",
+#     "arthur brooke",
+#     "godwin lydgate",
+#     "wrench",
+#     "fred vincy",
+#     "tertius lydgate",
+#     "rosamond vincy"
+#     ]
+# name_corpus = "corpus/middlemarch.txt"
+# name_corpus_annote = "corpus/middlemarch_annote.txt"
+# characters = run_extration(name_corpus, name_corpus_annote, characters, \
+#                            5, True)
         
 
+# =============================================================================
+# Évaluation totale (très long à exécuter, coréférence à exclure si possible)
+# =============================================================================
+# corpus_array = [
+#     "corpus/debug.txt",
+#     "corpus/little_womens.txt",
+#     "corpus/sherlock.txt",
+#     "corpus/main_street.txt",
+#     "corpus/middlemarch.txt"
+#     ]
 
+# corpus_annote_array = [
+#     "corpus/debug_annote.txt",
+#     "corpus/little_womens_annote.txt",
+#     "corpus/sherlock_annote.txt",
+#     "corpus/main_street_annote.txt",
+#     "corpus/middlemarch_annote.txt"
+#     ]
 
+# characters = [
+#     [],
+#     [],
+#     [],
+#     [
+#     "carol",
+#     "kennicott",
+#     "raymond wutherspoon",
+#     "guy pollock",
+#     "vida sherwin",
+#     "miles bjornstam",
+#     "bea sorenson",
+#     "erik valborg",
+#     "maud dyer",
+#     "whittier smail"
+#     ],
+#     [
+#     "dorothea brooke",
+#     "edward casaubon",
+#     "will ladislaw",
+#     "harriet bulstrode",
+#     "arthur brooke",
+#     "godwin lydgate",
+#     "wrench",
+#     "fred vincy",
+#     "tertius lydgate",
+#     "rosamond vincy"
+#     ]
+#     ]
+
+# recall, accuracy = [], []
+# for k in range(len(corpus_array)):
+#     _, recall_tmp, accuracy_tmp = run_extration(corpus_array[k], \
+#                                 corpus_annote_array[k], characters[k], 5, True)
+#     recall.append(recall_tmp)
+#     accuracy.append(accuracy_tmp)
+    
+# r = sum(recall) / len(corpus_array)
+# a = sum(accuracy) / len(corpus_array)
+# k = np.arange(1, 21)
+
+# plt.clf()
+# plt.grid()
+
+# plt.xlabel("Occurence k")
+
+# plt.plot(k, r, label = "Rappel")
+# plt.plot(k, a, label = "Précision")
+
+# plt.legend()
+
+# plt.show()
+
+# # Graphe rappel-précision
+
+# plt.clf()
+# plt.grid()
+
+# plt.xlabel("Rappel")
+# plt.ylabel("Précision")
+
+# plt.plot(r, a)
+
+# plt.show()

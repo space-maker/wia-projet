@@ -1,0 +1,20 @@
+Dorothea Brooke,Family,Edward Casaubon
+Dorothea Brooke,Family,Will Ladislaw
+Rosamond Vincy,Family,Tertius Lydgate
+Celia Brooke,Family,Dorothea Brooke
+Arthur Brooke,Professional,Will Ladislaw
+Arthur Brooke,Family,Dorothea Brooke
+Harriet Bulstrode,Family,Nicholas Bulstrode
+Edward Casaubon,Family,Will Ladislaw
+James Chettam,Social,Dorothea Brooke
+Godwin Lydgate,Family,Tertius Lydgate
+Edward Casaubon,Family,Dorothea Brooke
+Will Ladislaw,Family,Dorothea Brooke
+Arthur Brooke,Family,Dorothea Brooke
+Arthur Brooke,Professional,Will Ladislaw
+Nicholas Bulstrode,Family,Harriet Bulstrode
+Walter Vincy,Harriet Bulstrode,Family
+Walter Vincy,Family,Lucy Vincy
+Walter Vincy,Family,Fred Vincy
+Wrench,Professional,Fred Vincy
+Wrench,Social,Tertius Lydgate
