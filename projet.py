@@ -237,7 +237,9 @@ def match_between_relations(relations1, relations2):
                 
     return c
             
-
+"""
+Fonction d'évaluation basée sur le rappel-précision
+"""
 def eval_match(start_k, stop_k, doc, characters, relations_annoted):
     cardinal_relations_annoted = len(relations_annoted)
     n = (stop_k - start_k) + 1
@@ -369,7 +371,7 @@ characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
 # =============================================================================
 name_corpus = "corpus/sherlock.txt"
 name_corpus_annote = "corpus/sherlock_annote.txt"
-characters = run_extration(name_corpus, name_corpus_annote, [], 5)
+characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
    
 # =============================================================================
 # Little Women
