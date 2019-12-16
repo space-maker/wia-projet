@@ -299,7 +299,7 @@ print("Chargement du modèle...")
 nlp = spacy.load('en_core_web_sm')
 
 # Activer ou non la coréférence. Peut prendre un certain temps d'exécution.
-neuralcoref_active = True
+neuralcoref_active = False
 
 if neuralcoref_active:
     import neuralcoref
@@ -360,145 +360,146 @@ def run_extration(name_corpus, name_corpus_annote, characters_input, k, \
 # =============================================================================
 # Debug
 # =============================================================================
-# name_corpus = "corpus/debug.txt"
-# name_corpus_annote = "corpus/debug_annote.txt"
-# characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
+name_corpus = "corpus/debug.txt"
+name_corpus_annote = "corpus/debug_annote.txt"
+characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
 
 # =============================================================================
 # Sherlock Holmmes
 # =============================================================================
 name_corpus = "corpus/sherlock.txt"
 name_corpus_annote = "corpus/sherlock_annote.txt"
-characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
+characters = run_extration(name_corpus, name_corpus_annote, [], 5)
    
 # =============================================================================
 # Little Women
 # =============================================================================
-# name_corpus = "corpus/little_womens.txt"
-# name_corpus_annote = "corpus/little_womens_annote.txt"
-# characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
+name_corpus = "corpus/little_womens.txt"
+name_corpus_annote = "corpus/little_womens_annote.txt"
+characters = run_extration(name_corpus, name_corpus_annote, [], 5, True)
 
 # =============================================================================
 # Main Street (personnages ajoutés manuellement)
 # =============================================================================
-# name_corpus = "corpus/main_street.txt"
-# name_corpus_annote = "corpus/main_street_annote.txt"
-# characters = [
-#     "carol",
-#     "kennicott",
-#     "raymond wutherspoon",
-#     "guy pollock",
-#     "vida sherwin",
-#     "miles bjornstam",
-#     "bea sorenson",
-#     "erik valborg",
-#     "maud dyer",
-#     "whittier smail"
-#     ]
-# characters = run_extration(name_corpus, name_corpus_annote, characters, \
-#                            5, True)
+name_corpus = "corpus/main_street.txt"
+name_corpus_annote = "corpus/main_street_annote.txt"
+characters = [
+    "carol",
+    "kennicott",
+    "raymond wutherspoon",
+    "guy pollock",
+    "vida sherwin",
+    "miles bjornstam",
+    "bea sorenson",
+    "erik valborg",
+    "maud dyer",
+    "whittier smail"
+    ]
+characters = run_extration(name_corpus, name_corpus_annote, characters, \
+                            5, True)
 
 # =============================================================================
 # Middlermarch (assez long à exécuter)
 # =============================================================================
-# characters = [
-#     "dorothea brooke",
-#     "edward casaubon",
-#     "will ladislaw",
-#     "harriet bulstrode",
-#     "arthur brooke",
-#     "godwin lydgate",
-#     "wrench",
-#     "fred vincy",
-#     "tertius lydgate",
-#     "rosamond vincy"
-#     ]
-# name_corpus = "corpus/middlemarch.txt"
-# name_corpus_annote = "corpus/middlemarch_annote.txt"
-# characters = run_extration(name_corpus, name_corpus_annote, characters, \
-#                            5, True)
+characters = [
+    "dorothea brooke",
+    "edward casaubon",
+    "will ladislaw",
+    "harriet bulstrode",
+    "arthur brooke",
+    "godwin lydgate",
+    "wrench",
+    "fred vincy",
+    "tertius lydgate",
+    "rosamond vincy"
+    ]
+name_corpus = "corpus/middlemarch.txt"
+name_corpus_annote = "corpus/middlemarch_annote.txt"
+characters = run_extration(name_corpus, name_corpus_annote, characters, \
+                            5, True)
         
 
 # =============================================================================
 # Évaluation totale (très long à exécuter, coréférence à exclure si possible)
 # =============================================================================
-# corpus_array = [
-#     "corpus/debug.txt",
-#     "corpus/little_womens.txt",
-#     "corpus/sherlock.txt",
-#     "corpus/main_street.txt",
-#     "corpus/middlemarch.txt"
-#     ]
+corpus_array = [
+    "corpus/debug.txt",
+    "corpus/little_womens.txt",
+    "corpus/sherlock.txt",
+    "corpus/main_street.txt",
+    "corpus/middlemarch.txt"
+    ]
 
-# corpus_annote_array = [
-#     "corpus/debug_annote.txt",
-#     "corpus/little_womens_annote.txt",
-#     "corpus/sherlock_annote.txt",
-#     "corpus/main_street_annote.txt",
-#     "corpus/middlemarch_annote.txt"
-#     ]
+corpus_annote_array = [
+    "corpus/debug_annote.txt",
+    "corpus/little_womens_annote.txt",
+    "corpus/sherlock_annote.txt",
+    "corpus/main_street_annote.txt",
+    "corpus/middlemarch_annote.txt"
+    ]
 
-# characters = [
-#     [],
-#     [],
-#     [],
-#     [
-#     "carol",
-#     "kennicott",
-#     "raymond wutherspoon",
-#     "guy pollock",
-#     "vida sherwin",
-#     "miles bjornstam",
-#     "bea sorenson",
-#     "erik valborg",
-#     "maud dyer",
-#     "whittier smail"
-#     ],
-#     [
-#     "dorothea brooke",
-#     "edward casaubon",
-#     "will ladislaw",
-#     "harriet bulstrode",
-#     "arthur brooke",
-#     "godwin lydgate",
-#     "wrench",
-#     "fred vincy",
-#     "tertius lydgate",
-#     "rosamond vincy"
-#     ]
-#     ]
+characters = [
+    [],
+    [],
+    [],
+    [
+    "carol",
+    "kennicott",
+    "raymond wutherspoon",
+    "guy pollock",
+    "vida sherwin",
+    "miles bjornstam",
+    "bea sorenson",
+    "erik valborg",
+    "maud dyer",
+    "whittier smail"
+    ],
+    [
+    "dorothea brooke",
+    "edward casaubon",
+    "will ladislaw",
+    "harriet bulstrode",
+    "arthur brooke",
+    "godwin lydgate",
+    "wrench",
+    "fred vincy",
+    "tertius lydgate",
+    "rosamond vincy"
+    ]
+    ]
 
-# recall, accuracy = [], []
-# for k in range(len(corpus_array)):
-#     _, recall_tmp, accuracy_tmp = run_extration(corpus_array[k], \
-#                                 corpus_annote_array[k], characters[k], 5, True)
-#     recall.append(recall_tmp)
-#     accuracy.append(accuracy_tmp)
+recall, accuracy = [], []
+for k in range(len(corpus_array)):
+    _, recall_tmp, accuracy_tmp = run_extration(corpus_array[k], \
+                                corpus_annote_array[k], characters[k], 5,\
+  True)
+    recall.append(recall_tmp)
+    accuracy.append(accuracy_tmp)
     
-# r = sum(recall) / len(corpus_array)
-# a = sum(accuracy) / len(corpus_array)
-# k = np.arange(1, 21)
+r = sum(recall) / len(corpus_array)
+a = sum(accuracy) / len(corpus_array)
+k = np.arange(1, 21)
 
-# plt.clf()
-# plt.grid()
+plt.clf()
+plt.grid()
 
-# plt.xlabel("Occurence k")
+plt.xlabel("Occurence k")
 
-# plt.plot(k, r, label = "Rappel")
-# plt.plot(k, a, label = "Précision")
+plt.plot(k, r, label = "Rappel")
+plt.plot(k, a, label = "Précision")
 
-# plt.legend()
+plt.legend()
 
-# plt.show()
+plt.show()
 
-# # Graphe rappel-précision
+# Graphe rappel-précision
 
-# plt.clf()
-# plt.grid()
+plt.clf()
+plt.grid()
 
-# plt.xlabel("Rappel")
-# plt.ylabel("Précision")
+plt.xlabel("Rappel")
+plt.ylabel("Précision")
 
-# plt.plot(r, a)
+plt.plot(r, a)
 
-# plt.show()
+plt.show()
